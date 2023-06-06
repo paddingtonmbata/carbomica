@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+import numpy as np
 
 #%%
 facilities = {
@@ -36,39 +37,9 @@ def calc_emissions(results,start_year,facility_code,file_name):
     :param file_name: (optional) specify excel file name for saving
     :return: df_emissions: dataFrame of results
     '''
-    parameters = ['SC1_energy_actual',
-                'SC1_travel_actual',
-                'SC1_refrigerants_actual',
-                'SC1_waste_actual',
-                'SC1_anaesthetic_actual',
-                'SC2_electricity_actual',
-                'SC2_heat_actual',
-                'SC3_energy_actual',
-                'SC3_refrigerants_actual',
-                'SC3_travel_actual',
-                'SC3_business_actual',
-                'SC3_water_actual',
-                'SC3_waste_actual',
-                'SC3_logistics_actual',
-                'SC3_inhalers_actual',
-                'SC3_supply_actual'
+    parameters = ['co2e_emissions_actual'
                 ]
-    outcomes = ['SC1 Building energy',
-                'SC1 Travel',
-                'SC1 Refrigerants',
-                'SC1 Waste',
-                'SC1 Anaesthetic gases',
-                'SC2 Purchased and consumed grid electricity',
-                'SC2 Heat networks',
-                'SC3 Building energy (building not owned)',
-                'SC3 Refrigerants (building not owned)',
-                'SC3 Travel (vehicles not owned)',
-                'SC3 Employee business travel-road, rail, air',
-                'SC3 Water',
-                'SC3 Waste',
-                'SC3 Contractor logistics',
-                'SC3 Inhalers',
-                'SC3 Supply chain'
+    outcomes = ['Total CO2e emissions'
                 ]
     writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     
@@ -87,10 +58,8 @@ def calc_emissions(results,start_year,facility_code,file_name):
     workbook  = writer_emissions.book
     worksheet = writer_emissions.sheets[facility_code]
     format_emit = workbook.add_format({'num_format': '#,##0.00'})
-    worksheet.set_row(1, None, format_emit)
-    worksheet.set_row(2, None, format_emit)
-    worksheet.set_row(3, None, format_emit)
-    worksheet.set_row(4, None, format_emit)
+    for i in np.arange(len(rows)):
+        worksheet.set_row(i+1, None, format_emit) 
     
     # Generate bar plots of emissions
     plt.figure()
@@ -140,7 +109,8 @@ def calc_allocation(results,file_name):
     workbook  = writer_optim.book
     worksheet = writer_optim.sheets['Optimized allocation']
     format_cost = workbook.add_format({'num_format': '$#,##0.0'})
-    worksheet.set_row(1, None, format_cost)
+    for i in np.arange(len(res_names)):
+        worksheet.set_row(i+1, None, format_cost) 
     writer_optim.close()
     print('Allocation results saved: results/{}.xlsx'.format(file_name))
     print('Allocation bar plots saved: figs/{}.xlsx'.format(file_name))
