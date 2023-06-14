@@ -33,7 +33,7 @@ adjustments = [at.SpendingAdjustment(prog, start_year, 'abs', 0.0, 1e6) for prog
 measurables = [at.MinimizeMeasurable('co2e_emissions_actual',[start_year,np.inf])]
 
 # Loop over budgets
-budgets = [2e3, 5e3, 10e3]
+budgets = [2e4, 5e4, 1e5]
 results_optimized = []
 
 for budget in budgets:
