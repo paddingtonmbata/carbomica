@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
 import numpy as np
+import atomica as at
 
 #%%
 facilities = {
@@ -116,3 +117,47 @@ def calc_allocation(results,file_name):
     print('Allocation bar plots saved: figs/{}.xlsx'.format(file_name))
     
     return df_spending_optimized
+
+def write_alloc_excel(P, results, file_name):
+    """Write optimized budget alloations onto an excel file
+        :param: P: atomica project
+        :param: results: results from optimization runs
+        :param: save_dir: path for saving the plot
+        :param: name to be given to excel file (string)"""
+    active_programs = []
+    for prog_name, prog in P.progsets['default'].programs.items():
+        if "culture" not in prog_name and "community_orgs" not in prog_name and "stigma" not in prog_name and "workforce" not in prog_name and "nsp" not in prog_name and "ost" not in prog_name and "hbv_campaigns_health_pw" not in prog_name and "hiv_incentives_prov" not in prog_name and "hiv_nurse_support" not in prog_name:
+            active_programs.append(prog)
+    progname = []
+    prog_labels = []
+    for prog in active_programs:
+        progname += [prog.name]
+        prog_labels += [prog.label]
+        
+    bars = []
+    for i in range(0, len(results)):
+         bar_name = results[i].name
+         bars.append(bar_name)
+         
+    d1 = at.PlotData.programs(results, quantity='spending')
+    d1.interpolate([2023])
+    spending_raw_data = {(x.result, x.output): x.vals[0] for x in d1.series}
+    spending_data = {res: {prog:0 for prog in progname} for res in bars}
+    
+    d2 = at.PlotData.programs(results, quantity='coverage_fraction')
+    d2.interpolate([2023])
+    cov_raw_data = {(x.result, x.output): x.vals[0] for x in d2.series}
+    cov_data = {res: {prog:0 for prog in progname} for res in bars}
+    writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+    for br in bars:
+        for prog in progname:
+            spending_data[br][prog] = spending_raw_data[(br, prog)]
+            cov_data[br][prog] = cov_raw_data[(br, prog)]
+    df1 = pd.DataFrame(spending_data)
+    df2 = pd.DataFrame(cov_data)
+    df1.index = prog_labels
+    df2.index = prog_labels
+    df1.to_excel(writer, sheet_name="Budgets")
+    df2.to_excel(writer, sheet_name="Coverages")
+    writer.save()
+    print('Excel file saved: {}'.format(file_name))
