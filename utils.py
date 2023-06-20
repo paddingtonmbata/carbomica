@@ -161,3 +161,5 @@ def write_alloc_excel(P, results, file_name):
     df2.to_excel(writer, sheet_name="Coverages")
     writer.save()
     print('Excel file saved: {}'.format(file_name))
+    
+    return df1, df2
