@@ -35,7 +35,7 @@ measurables = [at.MinimizeMeasurable('co2e_emissions_actual',[start_year,np.inf]
 # Loop over budgets
 budgets = [2e3, 4e3, 8e3]
 results_optimized = []
-np.random.seed(3)
+np.random.seed(4)
 
 #%% Initialize solution with pso
 for budget in budgets:
