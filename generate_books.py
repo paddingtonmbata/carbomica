@@ -30,11 +30,11 @@ interventions = {
 columns = ['facilities_number', 'co2e_emissions']
 for intervention in interventions:
     columns.append(intervention+'_effect')
-df_data = []
-df_costs = []
+df_data = pd.DataFrame(columns=columns, index=facilities)
+df_costs = pd.DataFrame(columns=interventions, index=facilities)
 with pd.ExcelWriter('templates/input_data_base.xlsx') as writer:
-    df_data.to_excel(writer, sheet_name='data', columns=columns, index_label=facilities)
-    df_costs.to_excel(writer, sheet_name='costs', index_label=facilities)
+    df_data.to_excel(writer, sheet_name='data')
+    df_costs.to_excel(writer, sheet_name='costs')
     
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework from template
