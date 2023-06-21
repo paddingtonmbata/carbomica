@@ -4,29 +4,6 @@ import pandas as pd
 import numpy as np
 import atomica as at
 
-#%%
-facilities = {
-    'aga-khan_hosp_KE': {'label': 'Aga Khan Hospital, Kenya', 'type': 'facilities'},
-    'aga-khan_medi_KE': {'label': 'Aga Khan Medical Centre, Kenya', 'type': 'facilities'},
-    'laudium_chc_SA': {'label': 'Laudium Community Health Centre, South Africa', 'type': 'facilities'},
-    'stanza-bopape_chc_SA': {'label': 'Stanza Bopape Community Health Centre, South Africa', 'type': 'facilities'},
-    'mamelodi_hosp_SA': {'label': 'Mamelodi Regional Hospital, South Africa', 'type': 'facilities'},
-    'mt-darwin_hosp_ZW': {'label': 'Mt Darwin District Hospital, Zimbabwe', 'type': 'facilities'},
-    'dotito_rhcc_ZW': {'label': 'Dotito Rural Health Care Clinic, Zimbabwe', 'type': 'facilities'},
-    'chitse_rhcc_ZW': {'label': 'Chitse Rural Health Care Clinic, Zimbabwe', 'type': 'facilities'}
-    }
-
-# Mitigation interventions (modify as needed)
-interventions = {
-    'energy_led': 'Energy saving LED',
-    'low_emit_mat': 'Low emitting materials',
-    'electric_cars': 'Electric cars',
-    'low_emit_gas': 'Low emitting anesthetic gases',
-    'borehole_water': 'Borehole water',
-    'recycle': 'Recycling',
-    'low_emit_inhale': 'Low emitting inhalers',
-    'local_procure': 'Local procurements'
-    }
 
 #%% Calculation functions
 def calc_emissions(results,start_year,facility_code,file_name):
@@ -38,10 +15,8 @@ def calc_emissions(results,start_year,facility_code,file_name):
     :param file_name: (optional) specify excel file name for saving
     :return: df_emissions: dataFrame of results
     '''
-    parameters = ['co2e_emissions_actual'
-                ]
-    outcomes = ['Total CO2e emissions'
-                ]
+    parameters = ['co2e_emissions_actual']
+    outcomes = ['Total CO2e emissions']
     writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     
     rows = ['Status-quo'] + [res.name for res in results]
