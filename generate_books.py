@@ -26,6 +26,16 @@ interventions = {
     'local_procure': 'Local procurements'
     }
 
+#%% Create input_data spreadsheet
+columns = ['facilities_number', 'co2e_emissions']
+for intervention in interventions:
+    columns.append(intervention+'_effect')
+df_data = []
+df_costs = []
+with pd.ExcelWriter('templates/input_data_base.xlsx') as writer:
+    df_data.to_excel(writer, sheet_name='data', columns=columns, index_label=facilities)
+    df_costs.to_excel(writer, sheet_name='costs', index_label=facilities)
+    
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework from template
 dfs = pd.read_excel(pd.ExcelFile('templates/carbomica_framework_base.xlsx'), sheet_name=None)
@@ -82,7 +92,7 @@ for facility in facilities.keys():
         
 # Populate the progbook using the empty progbooks that were just created (in folder "templates") as a base
 D = at.ProjectData.from_spreadsheet(databook_name,framework=F) 
-pb_costs = pd.read_excel('input_data.xlsx', sheet_name='unit_costs', index_col='facilities')  
+pb_costs = pd.read_excel('input_data.xlsx', sheet_name='costs', index_col='facilities')  
 for facility in facilities:
     P = at.ProgramSet.from_spreadsheet(spreadsheet='templates/carbomica_progbook_{}.xlsx'.format(facility), framework=F, data=D, _allow_missing_data=True)
     for intervention in interventions.keys():
