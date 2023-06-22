@@ -24,10 +24,10 @@ coverage = [0.5, 1] #
 result = []
 # Option 1: increase coverage for all interventions
 for cov in coverage:
-    # coverage_scenario = {prog: at.TimeSeries(start_year,cov) for prog in progset.programs.keys()}
+    # coverage_scenario = {prog: at.TimeSeries(start_year,cov) for prog in progset.programs}
         
     # Option 2: increase coverage for specific interventions
-    coverage_scenario = {'electric_cars': at.TimeSeries(start_year,cov)
+    coverage_scenario = {'electric_cars': at.TimeSeries(start_year,cov),
                           }
         
     instructions = at.ProgramInstructions(start_year=start_year, coverage=coverage_scenario) # define program instructions

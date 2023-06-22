@@ -24,11 +24,10 @@ investment = [300,600] #
 result = []
 for invest in investment:
     # Option 1: increase investments for all interventions
-    # budget_scenario = {prog: at.TimeSeries(start_year,invest) for prog in progset.programs.keys()}    
+    # budget_scenario = {prog: at.TimeSeries(start_year,invest) for prog in progset.programs}    
     
     # Option 2: increase investments for specific interventions
-    budget_scenario = {'electric_cars': at.TimeSeries(start_year,invest)
-                          }
+    budget_scenario = {'electric_cars': at.TimeSeries(start_year,invest)}
         
     instructions = at.ProgramInstructions(start_year=start_year, alloc=budget_scenario) # define program instructions
     result_budget = P.run_sim(P.parsets[0],progset=P.progsets[0], progset_instructions=instructions, result_name='${}'.format(invest)) # run budget scenario

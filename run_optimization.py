@@ -5,7 +5,7 @@ import os
 if not os.path.exists('results'): os.makedirs('results')
 if not os.path.exists('figs'): os.makedirs('figs')
 '''
-Script to optimize spending given a budget.
+Script to minimize emissions and optimize spending allocation for a set total budget.
 '''
 
 facility_code = 'mt-darwin_hosp_ZW' # specify facility code
@@ -25,30 +25,30 @@ start_year = 2024 # programs start year
 # Baseline spending
 instructions = at.ProgramInstructions(alloc=P.progsets[0], start_year=start_year)
 
-# Adjustments (spending constraint for each program)
-adjustments = [at.SpendingAdjustment(prog, start_year, 'abs', 0.0, 1e6) for prog in progset.programs.keys()]
+# Adjustments (no spending constraint on any intervention)
+adjustments = [at.SpendingAdjustment(prog, start_year, 'abs', 0.0, 1e6) for prog in progset.programs]
 
 # Measurables (objective function: minimize total emissions)
-measurables = [at.MinimizeMeasurable('co2e_emissions_actual',[start_year,np.inf])]
+measurables = [at.MinimizeMeasurable('co2e_emissions_actual',start_year)]
 
-# Loop over budgets
-budgets = [2e3, 4e3, 8e3]
-results_optimized = []
+# Set random seed
 np.random.seed(4)
 
 #%% Initialize solution with pso
+# Loop over budgets
+budgets = [2e3, 4e3, 8e3]
+results_optimized = []
 for budget in budgets:
+    result_name = '${}k'.format(budget/1e3)
     constraints = at.TotalSpendConstraint(total_spend=budget, t=start_year) # constraint on total spending
 
     # Run optimization
     optimization = at.Optimization(name='default', method='pso', 
                                    adjustments=adjustments, measurables=measurables, constraints=constraints)
     optimized_instructions = at.optimize(P, optimization, P.parsets[0],P.progsets[0], instructions=instructions, optim_args={"maxiter": 10})
-    result_optimized = P.run_sim(P.parsets[0],P.progsets[0], progset_instructions=optimized_instructions)
+    result_optimized = P.run_sim(P.parsets[0],P.progsets[0], progset_instructions=optimized_instructions,result_name=result_name)
 
     # Compile results
-    opt_name = '${}k'.format(budget/1e3)
-    result_optimized.name = opt_name
     results_optimized.append(result_optimized)
 
 ut.calc_emissions(results_optimized,start_year,facility_code,file_name='emissions_optimized_{}'.format(facility_code))
@@ -58,18 +58,17 @@ allocation_initial, _ = ut.write_alloc_excel(P, results_optimized, 'results/opti
 #%% Refine optimization with ASD
 results_optimized = []
 for budget in budgets:
-    opt_name = '${}k'.format(budget/1e3)
+    result_name = '${}k'.format(budget/1e3)
     constraints = at.TotalSpendConstraint(total_spend=budget, t=start_year) # constraint on total spending
-    adjustments = [at.SpendingAdjustment(prog, start_year, initial=allocation_initial[opt_name][progset.programs[prog].label]) for prog in progset.programs.keys()]
+    adjustments = [at.SpendingAdjustment(prog, start_year, initial=allocation_initial[result_name][progset.programs[prog].label]) for prog in progset.programs]
     
     # Run optimization
     optimization = at.Optimization(name='default', method='asd', 
                                    adjustments=adjustments, measurables=measurables, constraints=constraints)
     optimized_instructions = at.optimize(P, optimization, P.parsets[0],P.progsets[0], instructions=instructions)
-    result_optimized = P.run_sim(P.parsets[0],P.progsets[0], progset_instructions=optimized_instructions)
+    result_optimized = P.run_sim(P.parsets[0],P.progsets[0], progset_instructions=optimized_instructions,result_name=result_name)
 
     # Compile results
-    result_optimized.name = opt_name
     results_optimized.append(result_optimized)
     
 ut.calc_emissions(results_optimized,start_year,facility_code,file_name='emissions_optimized_{}'.format(facility_code))

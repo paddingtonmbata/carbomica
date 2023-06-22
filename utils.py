@@ -60,7 +60,7 @@ def calc_allocation(results,file_name):
     :param results: list of atomica result objects
     :param file_name: (optional) specify excel file name for saving
     '''
-    prog_codes = results[0].model.progset.programs.keys()
+    prog_codes = results[0].model.progset.programs
     prog_labels = [results[0].model.progset.programs[prog].label for prog in prog_codes]
     res_names = [res.name for res in results]
     df_spending_optimized = pd.DataFrame(index=res_names, columns=prog_labels)

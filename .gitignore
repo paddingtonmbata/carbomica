@@ -1,2 +1,4 @@
 results/
 figs/
+run_optimization_emissions.py
+run_optimization_spending.py
