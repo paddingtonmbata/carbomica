@@ -4,12 +4,12 @@ import pandas as pd
 Script to generate a framework, databook and progbook.
 '''
 #%% 
-sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites', index_col='Code Name')
+sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites (list)', index_col='Code Name')
 facilities = {}
 for site in sites_list.index:
     facilities[site] = {'label': sites_list.loc[site,'Display Name'], 'type': 'facilities'}
 
-interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions list', index_col='Code Name')
+interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions (list)', index_col='Code Name')
 interventions = {}
 for intervention in interventions_list.index:
     interventions[intervention] = interventions_list.loc[intervention,'Display Name']
@@ -18,7 +18,7 @@ for intervention in interventions_list.index:
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework base from template
 df_fw = pd.read_excel(pd.ExcelFile('templates/carbomica_framework_template.xlsx'), sheet_name=None)
-emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources', index_col='Code Name')
+emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources (list)', index_col='Code Name')
 
 # define intervention-specific parameters and add to the Parameters sheet as a new row
 for i, emission in enumerate(emissions_list.index):

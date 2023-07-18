@@ -72,6 +72,7 @@ for budget in budgets:
     results_optimized.append(result_optimized)
     
 ut.calc_emissions(results_optimized,start_year,facility_code,file_name='emissions_optimized_{}'.format(facility_code))
+ut.calc_emissions_all(results_optimized,start_year,facility_code,file_name='emissions_optimized_all_{}'.format(facility_code))
 ut.calc_allocation(results_optimized,file_name='allocation_optimized_{}'.format(facility_code)) # allocation
 ut.write_alloc_excel(progset, results_optimized, start_year, 'results/optimized_allocation_coverage.xlsx')
 
