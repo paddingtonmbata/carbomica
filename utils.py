@@ -15,15 +15,47 @@ def calc_emissions(results,start_year,facility_code,file_name):
     :param file_name: (optional) specify excel file name for saving
     :return: df_emissions: dataFrame of results
     '''
-    parameters = ['co2e_emissions_actual']
-    outcomes = ['Total CO2e emissions']
+    parameters = ['SC1_energy_actual',
+                'SC1_travel_actual',
+                'SC1_refrigerants_actual',
+                'SC1_waste_actual',
+                'SC1_anaesthetic_actual',
+                'SC2_electricity_actual',
+                'SC2_heat_actual',
+                'SC3_energy_actual',
+                'SC3_refrigerants_actual',
+                'SC3_travel_actual',
+                'SC3_business_actual',
+                'SC3_water_actual',
+                'SC3_waste_actual',
+                'SC3_logistics_actual',
+                'SC3_inhalers_actual',
+                'SC3_supply_actual'
+                ]
+    outcomes = ['SC1 Building energy',
+                'SC1 Travel',
+                'SC1 Refrigerants',
+                'SC1 Waste',
+                'SC1 Anaesthetic gases',
+                'SC2 Purchased and consumed grid electricity',
+                'SC2 Heat networks',
+                'SC3 Building energy (building not owned)',
+                'SC3 Refrigerants (building not owned)',
+                'SC3 Travel (vehicles not owned)',
+                'SC3 Employee business travel-road, rail, air',
+                'SC3 Water',
+                'SC3 Waste',
+                'SC3 Contractor logistics',
+                'SC3 Inhalers',
+                'SC3 Supply chain'
+                ]
     writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     
-    rows = ['Status-quo'] + [res.name for res in results]
+    rows = ['Status-\nquo'] + [res.name for res in results]
     df_emissions = pd.DataFrame(index=rows, columns=outcomes)
     start_i = list(results[0].t).index(start_year)
     for par, out in zip(parameters,outcomes):
-        df_emissions.loc['Status-quo', out] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
+        df_emissions.loc['Status-\nquo', out] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
     for res in results:
         # Create DataFrame of emissions
         for par, out in zip(parameters,outcomes):
@@ -34,14 +66,17 @@ def calc_emissions(results,start_year,facility_code,file_name):
     workbook  = writer_emissions.book
     worksheet = writer_emissions.sheets[facility_code]
     format_emit = workbook.add_format({'num_format': '#,##0.00'})
-    for i in np.arange(len(rows)):
-        worksheet.set_row(i+1, None, format_emit) 
+    worksheet.set_row(1, None, format_emit)
+    worksheet.set_row(2, None, format_emit)
+    worksheet.set_row(3, None, format_emit)
+    worksheet.set_row(4, None, format_emit)
     
     # Generate bar plots of emissions
     plt.figure()
     ax = df_emissions.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
-    plt.title('Total CO2e emissions (metric tonnes)')
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    plt.title('Total CO2e emissions')
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
@@ -73,6 +108,7 @@ def calc_allocation(results,file_name):
     ax = df_spending_optimized.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
+    plt.title('Budget optimization')
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
@@ -93,21 +129,18 @@ def calc_allocation(results,file_name):
     
     return df_spending_optimized
 
-def write_alloc_excel(P, results, file_name):
+def write_alloc_excel(progset, results, year, file_name):
     """Write optimized budget alloations onto an excel file
         :param: P: atomica project
         :param: results: results from optimization runs
         :param: save_dir: path for saving the plot
         :param: name to be given to excel file (string)"""
-    active_programs = []
-    for prog_name, prog in P.progsets['default'].programs.items():
-        if "culture" not in prog_name and "community_orgs" not in prog_name and "stigma" not in prog_name and "workforce" not in prog_name and "nsp" not in prog_name and "ost" not in prog_name and "hbv_campaigns_health_pw" not in prog_name and "hiv_incentives_prov" not in prog_name and "hiv_nurse_support" not in prog_name:
-            active_programs.append(prog)
+        
     progname = []
     prog_labels = []
-    for prog in active_programs:
-        progname += [prog.name]
-        prog_labels += [prog.label]
+    for prog in progset.programs:
+        progname += [prog]
+        prog_labels += [progset.programs[prog].label]
         
     bars = []
     for i in range(0, len(results)):
@@ -115,12 +148,12 @@ def write_alloc_excel(P, results, file_name):
          bars.append(bar_name)
          
     d1 = at.PlotData.programs(results, quantity='spending')
-    d1.interpolate([2023])
+    d1.interpolate(year)
     spending_raw_data = {(x.result, x.output): x.vals[0] for x in d1.series}
     spending_data = {res: {prog:0 for prog in progname} for res in bars}
     
     d2 = at.PlotData.programs(results, quantity='coverage_fraction')
-    d2.interpolate([2023])
+    d2.interpolate(year)
     cov_raw_data = {(x.result, x.output): x.vals[0] for x in d2.series}
     cov_data = {res: {prog:0 for prog in progname} for res in bars}
     writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
