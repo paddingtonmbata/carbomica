@@ -4,21 +4,20 @@ import pandas as pd
 Script to generate a framework, databook and progbook.
 '''
 #%% 
-sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites (list)', index_col='Code Name')
+sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites', index_col='Code Name')
 facilities = {}
 for site in sites_list.index:
     facilities[site] = {'label': sites_list.loc[site,'Display Name'], 'type': 'facilities'}
 
-interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions (list)', index_col='Code Name')
+interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions', index_col='Code Name')
 interventions = {}
 for intervention in interventions_list.index:
     interventions[intervention] = interventions_list.loc[intervention,'Display Name']
 
-
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework base from template
 df_fw = pd.read_excel(pd.ExcelFile('templates/carbomica_framework_template.xlsx'), sheet_name=None)
-emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources (list)', index_col='Code Name')
+emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources', index_col='Code Name')
 
 # define intervention-specific parameters and add to the Parameters sheet as a new row
 for i, emission in enumerate(emissions_list.index):
@@ -58,7 +57,6 @@ for i, emission in enumerate(emissions_list.index):
 with pd.ExcelWriter('carbomica_framework.xlsx') as writer:
     for sheet_name, df in df_fw.items():
         df.to_excel(writer, sheet_name=sheet_name, index=False)
-    
 
 #%% Step 2: generate and populate the databook (saved in "books/")
 F = at.ProjectFramework('carbomica_framework.xlsx')  # load framework
@@ -75,10 +73,7 @@ for facility in facilities:
     for parameter in db_data.columns:
         D.tdve[parameter].ts[facility] = at.TimeSeries(data_years, db_data.loc[facility,parameter])
         D.tdve[parameter].write_assumption = True
-    # for emission in emissions_list.index:
-    #     D.tdve['facilities_number'].ts[facility] = at.TimeSeries(data_years, 1, units='Number')
-    #     D.tdve['facilities_number'].write_assumption = True
-    
+        
 D.save('books/carbomica_databook.xlsx')
     
 #%% Step 3: generate empty progbooks in folder "templates/"
