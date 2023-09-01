@@ -24,27 +24,19 @@ for i, emission in enumerate(emissions_list.index):
     emission_par = {'Code Name': emission, 
                 'Display Name': emissions_list.loc[emission,'Display Name'],
                 'Targetable': 'n',
-                'Databook Page': 'emission_sources',
-                'Population type': 'facilities',
-                'Guidance': emissions_list.loc[emission,'Guidance'],
-                'Timed': 'n', 'Is derivative': 'n'} # define coverage of intervention as a new row in framework
+                'Databook Page': 'emission_sources'} # define coverage of intervention as a new row in framework
     emission_mult = {'Code Name': emission+'_mult', 
                 'Display Name': emissions_list.loc[emission,'Display Name'] + ' - multiplier',
                 'Targetable': 'y',
                 'Default Value': 1,
                 'Minimum Value': 0,
                 'Maximum Value': 1,
-                'Databook Page': 'targeted_pars',
-                'Population type': 'facilities',
-                'Guidance': 'Multiplier that can be targeted by programs to proportionally reduce emissions (default = 1, programs to target and reduce parameter, e.g., if an intervention reduces a specific emission by 20%, then {} = 0.20)'.format(emission+'_mult'),
-                'Timed': 'n', 'Is derivative': 'n'} # define coverage of intervention as a new row in framework
+                'Databook Page': 'targeted_pars'}
     emission_actual = {'Code Name': emission+'_actual', 
             'Display Name': emissions_list.loc[emission,'Display Name'] + ' - actual',
             'Targetable': 'n',
             'Population type': 'facilities',
-            'Function': emission_par['Code Name']+'*'+emission_mult['Code Name'],
-            'Guidance': 'Actual emissions after applying intervention effects.',
-            'Timed': 'n', 'Is derivative': 'n'} # define coverage of intervention as a new row in framework
+            'Function': emission_par['Code Name']+'*'+emission_mult['Code Name']} # define coverage of intervention as a new row in framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_par, ignore_index=True) # add the coverage row to the framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_mult, ignore_index=True) # add the coverage row to the framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_actual, ignore_index=True) # add the coverage row to the framework

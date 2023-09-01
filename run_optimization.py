@@ -8,7 +8,7 @@ if not os.path.exists('figs'): os.makedirs('figs')
 Script to minimize emissions and optimize spending allocation for a set total budget.
 '''
 
-facility_code = 'mt-darwin_hosp_ZW' # specify facility code
+facility_code = 'facility_1' # specify facility code
 
 # Atomica project definition
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
