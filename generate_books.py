@@ -1,5 +1,7 @@
 import atomica as at
 import pandas as pd
+import os
+if not os.path.exists('books'): os.makedirs('books')
 '''
 Script to generate a framework, databook and progbook.
 '''
