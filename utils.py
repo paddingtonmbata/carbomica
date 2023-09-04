@@ -12,12 +12,11 @@ def calc_emissions(results,start_year,facility_code,file_name):
     :param results: list of atomica result objects
     :param start_year: start year of programs 
     :param facility: facility code
-    :param file_name: (optional) specify excel file name for saving
+    :param file_name: (optional) specify excel file name for saving (must have a value if print_results = True)
     :return: df_emissions: dataFrame of results
     '''
     parameters = ['co2e_emissions']
     outcomes = ['Total CO2e emissions']
-    writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     
     rows = ['Status-quo'] + [res.name for res in results]
     df_emissions = pd.DataFrame(index=rows, columns=outcomes)
@@ -28,8 +27,9 @@ def calc_emissions(results,start_year,facility_code,file_name):
         # Create DataFrame of emissions
         for par, out in zip(parameters,outcomes):
             df_emissions.loc[res.name, out] = res.get_variable(par, facility_code)[0].vals[start_i]
-        
+    
     # Print to excel
+    writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     df_emissions.to_excel(writer_emissions, sheet_name=facility_code, index=True)
     workbook  = writer_emissions.book
     worksheet = writer_emissions.sheets[facility_code]
@@ -63,53 +63,25 @@ def calc_emissions_all(results,start_year,facility_code,file_name):
     :param file_name: (optional) specify excel file name for saving
     :return: df_emissions: dataFrame of results
     '''
-    parameters = ['SC1_energy_actual',
-                'SC1_travel_actual',
-                'SC1_refrigerants_actual',
-                'SC1_waste_actual',
-                'SC1_anaesthetic_actual',
-                'SC2_electricity_actual',
-                'SC2_heat_actual',
-                'SC3_energy_actual',
-                'SC3_refrigerants_actual',
-                'SC3_travel_actual',
-                'SC3_business_actual',
-                'SC3_water_actual',
-                'SC3_waste_actual',
-                'SC3_logistics_actual',
-                'SC3_inhalers_actual',
-                'SC3_supply_actual'
-                ]
-    outcomes = ['SC1 Building energy',
-                'SC1 Travel',
-                'SC1 Refrigerants',
-                'SC1 Waste',
-                'SC1 Anaesthetic gases',
-                'SC2 Purchased and consumed grid electricity',
-                'SC2 Heat networks',
-                'SC3 Building energy (building not owned)',
-                'SC3 Refrigerants (building not owned)',
-                'SC3 Travel (vehicles not owned)',
-                'SC3 Employee business travel-road, rail, air',
-                'SC3 Water',
-                'SC3 Waste',
-                'SC3 Contractor logistics',
-                'SC3 Inhalers',
-                'SC3 Supply chain'
-                ]
-    writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
+    pop = results[0].pop_names[0]
+    pars = results[0].par_names(pop)
+    parameters = []
+    for par in pars:
+        if 'actual' in par:
+            parameters.append(par)
     
     rows = ['Status-\nquo'] + [res.name for res in results]
-    df_emissions = pd.DataFrame(index=rows, columns=outcomes)
+    df_emissions = pd.DataFrame(index=rows, columns=parameters)
     start_i = list(results[0].t).index(start_year)
-    for par, out in zip(parameters,outcomes):
-        df_emissions.loc['Status-\nquo', out] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
+    for par in parameters:
+        df_emissions.loc['Status-\nquo', par] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
     for res in results:
         # Create DataFrame of emissions
-        for par, out in zip(parameters,outcomes):
-            df_emissions.loc[res.name, out] = res.get_variable(par, facility_code)[0].vals[start_i]
+        for par in parameters:
+            df_emissions.loc[res.name, par] = res.get_variable(par, facility_code)[0].vals[start_i]
         
     # Print to excel
+    writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     df_emissions.to_excel(writer_emissions, sheet_name=facility_code, index=True)
     workbook  = writer_emissions.book
     worksheet = writer_emissions.sheets[facility_code]
@@ -151,7 +123,7 @@ def calc_allocation(results,file_name):
     for res in results:
         for prog_code, prog_name in zip(prog_codes,prog_labels):
             df_spending_optimized.loc[res.name,prog_name] = res.get_alloc()[prog_code][0]
-        
+    
     plt.figure()
     ax = df_spending_optimized.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
@@ -162,7 +134,7 @@ def calc_allocation(results,file_name):
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
     plt.close()
-        
+    
     writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
     
@@ -177,7 +149,7 @@ def calc_allocation(results,file_name):
     
     return df_spending_optimized
 
-def write_alloc_excel(progset, results, year, file_name):
+def write_alloc_excel(progset, results, year, print_results=True,file_name=None):
     """Write optimized budget alloations onto an excel file
         :param: P: atomica project
         :param: results: results from optimization runs
@@ -204,7 +176,6 @@ def write_alloc_excel(progset, results, year, file_name):
     d2.interpolate(year)
     cov_raw_data = {(x.result, x.output): x.vals[0] for x in d2.series}
     cov_data = {res: {prog:0 for prog in progname} for res in bars}
-    writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
     for br in bars:
         for prog in progname:
             spending_data[br][prog] = spending_raw_data[(br, prog)]
@@ -213,9 +184,12 @@ def write_alloc_excel(progset, results, year, file_name):
     df2 = pd.DataFrame(cov_data)
     df1.index = prog_labels
     df2.index = prog_labels
-    df1.to_excel(writer, sheet_name="Budgets")
-    df2.to_excel(writer, sheet_name="Coverages")
-    writer.save()
-    print('Excel file saved: {}'.format(file_name))
+    
+    if print_results:
+        writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+        df1.to_excel(writer, sheet_name="Budgets")
+        df2.to_excel(writer, sheet_name="Coverages")
+        writer.save()
+        print('Excel file saved: {}'.format(file_name))
     
     return df1, df2

@@ -30,7 +30,7 @@ for i, emission in enumerate(emissions_list.index):
     emission_mult = {'Code Name': emission+'_mult', 
                 'Display Name': emissions_list.loc[emission,'Display Name'] + ' - multiplier',
                 'Targetable': 'y',
-                'Default Value': 1,
+                'Default Value': 0,
                 'Minimum Value': 0,
                 'Maximum Value': 1,
                 'Databook Page': 'targeted_pars'}
@@ -38,7 +38,7 @@ for i, emission in enumerate(emissions_list.index):
             'Display Name': emissions_list.loc[emission,'Display Name'] + ' - actual',
             'Targetable': 'n',
             'Population type': 'facilities',
-            'Function': emission_par['Code Name']+'*'+emission_mult['Code Name']} # define coverage of intervention as a new row in framework
+            'Function': emission_par['Code Name']+'*(1-'+emission_mult['Code Name']+')'} # define coverage of intervention as a new row in framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_par, ignore_index=True) # add the coverage row to the framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_mult, ignore_index=True) # add the coverage row to the framework
     df_fw['Parameters'] = df_fw['Parameters'].append(emission_actual, ignore_index=True) # add the coverage row to the framework
@@ -107,6 +107,6 @@ for facility in facilities:
         target_pars = target_pars_overall.columns[target_pars_overall.loc[intervention]=='y'].tolist()
         for par in target_pars:
             effect = effects.loc[facility,intervention+'_effect']
-            P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=1,progs={intervention:effect})
+            P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=0,progs={intervention:effect})
     P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
     P.save('books/carbomica_progbook_{}.xlsx'.format(facility))  
