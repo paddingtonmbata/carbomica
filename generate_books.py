@@ -23,8 +23,8 @@ emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources',
 
 # define intervention-specific parameters and add to the Parameters sheet as a new row
 for i, emission in enumerate(emissions_list.index):
-    emission_par = {'Code Name': emission, 
-                'Display Name': emissions_list.loc[emission,'Display Name'],
+    emission_par = {'Code Name': emission+'_baseline', 
+                'Display Name': emissions_list.loc[emission,'Display Name'] + ' - baseline',
                 'Targetable': 'n',
                 'Databook Page': 'emission_sources'} # define coverage of intervention as a new row in framework
     emission_mult = {'Code Name': emission+'_mult', 
@@ -34,8 +34,8 @@ for i, emission in enumerate(emissions_list.index):
                 'Minimum Value': 0,
                 'Maximum Value': 1,
                 'Databook Page': 'targeted_pars'}
-    emission_actual = {'Code Name': emission+'_actual', 
-            'Display Name': emissions_list.loc[emission,'Display Name'] + ' - actual',
+    emission_actual = {'Code Name': emission, 
+            'Display Name': emissions_list.loc[emission,'Display Name'],
             'Targetable': 'n',
             'Population type': 'facilities',
             'Function': emission_par['Code Name']+'*(1-'+emission_mult['Code Name']+')'} # define coverage of intervention as a new row in framework
@@ -65,8 +65,8 @@ for facility in facilities:
     D.tdve['facilities_number'].ts[facility] = at.TimeSeries(data_years, 1, units='Number')
     D.tdve['facilities_number'].write_assumption = True
     for parameter in db_data.columns:
-        D.tdve[parameter].ts[facility] = at.TimeSeries(data_years, db_data.loc[facility,parameter])
-        D.tdve[parameter].write_assumption = True
+        D.tdve[parameter+'_baseline'].ts[facility] = at.TimeSeries(data_years, db_data.loc[facility,parameter])
+        D.tdve[parameter+'_baseline'].write_assumption = True
         
 D.save('books/carbomica_databook.xlsx')
     

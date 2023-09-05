@@ -6,7 +6,7 @@ import atomica as at
 
 
 #%% Calculation functions
-def calc_emissions(results,start_year,facility_code,file_name):
+def calc_emissions(results,start_year,facility_code,file_name,title=None):
     '''
     Calculate emissions before and after programs implementation, export results to excel and generate bar plots
     :param results: list of atomica result objects
@@ -19,7 +19,7 @@ def calc_emissions(results,start_year,facility_code,file_name):
     pars = results[0].par_names(pop)
     parameters = []
     for par in pars:
-        if 'actual' in par:
+        if '_mult' not in par and '_emissions' not in par and '_baseline' not in par:
             parameters.append(par)
     
     rows = ['Status-\nquo'] + [res.name for res in results]
@@ -48,8 +48,12 @@ def calc_emissions(results,start_year,facility_code,file_name):
     ax = df_emissions.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-    plt.title('Total CO2e emissions')
-    plt.xticks(rotation=0)
+    if title:
+        plt.title(title)
+    else:
+        plt.title('Total CO2e emissions')
+    labels = [label.replace(' ','\n') for label in df_emissions.index]
+    plt.xticks(fontsize=8, labels=labels, ticks=plt.xticks()[0],rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
@@ -80,7 +84,7 @@ def calc_allocation(results,file_name):
     ax = df_spending_optimized.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
-    plt.title('Budget optimization')
+    plt.title('Budget allocation')
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))

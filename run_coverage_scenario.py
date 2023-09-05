@@ -7,7 +7,7 @@ if not os.path.exists('figs'): os.makedirs('figs')
 Script to run a scenario where coverage on interventions is specified.
 '''
 
-facility_code = 'mt-darwin_hosp_ZW' # specify facility code
+facility_code = 'mt_darwin' # specify facility code
 
 # Atomica project definition
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
@@ -44,4 +44,4 @@ for prog in progset.programs:
     results_scenario.append(result_budget)
     
 # Calculate emissions and allocation
-ut.calc_emissions(results_scenario,start_year,facility_code,file_name='emissions_coverage_scen_{}'.format(facility_code))
+ut.calc_emissions(results_scenario,start_year,facility_code,file_name='emissions_coverage_scen_{}'.format(facility_code),title='CO2e emissions - full coverage scenario')
