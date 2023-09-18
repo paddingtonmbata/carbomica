@@ -36,10 +36,11 @@ np.random.seed(4)
 
 #%% Run optimization
 # Loop over budgets
-budgets = [0.5e4, 1e4, 2e4]
+budgets = [20e3, 50e3, 100e3]
+res_names = ['$20,000', '$50,000', '$100,000']
 results_optimized = []
-for budget in budgets:
-    result_name = '${}k'.format(budget/1e3)
+for budget, res_name in zip(budgets, res_names):
+    result_name = res_name
     constraints = at.TotalSpendConstraint(total_spend=budget, t=start_year) # constraint on total spending
     
     # Run optimization

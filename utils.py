@@ -21,16 +21,16 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
     for par in pars:
         if '_mult' not in par and '_emissions' not in par and '_baseline' not in par:
             parameters.append(par)
-    
+    par_labels = [par.replace('_',' ').title() for par in parameters]
     rows = ['Status-\nquo'] + [res.name for res in results]
-    df_emissions = pd.DataFrame(index=rows, columns=parameters)
+    df_emissions = pd.DataFrame(index=rows, columns=par_labels)
     start_i = list(results[0].t).index(start_year)
-    for par in parameters:
-        df_emissions.loc['Status-\nquo', par] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
+    for par, par_label in zip(parameters, par_labels):
+        df_emissions.loc['Status-\nquo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
     for res in results:
         # Create DataFrame of emissions
-        for par in parameters:
-            df_emissions.loc[res.name, par] = res.get_variable(par, facility_code)[0].vals[start_i]
+        for par, par_label in zip(parameters, par_labels):
+            df_emissions.loc[res.name, par_label] = res.get_variable(par, facility_code)[0].vals[start_i]
         
     # Print to excel
     writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
@@ -46,7 +46,7 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
     # Generate bar plots of emissions
     plt.figure()
     ax = df_emissions.plot.bar(stacked=True)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Emission sources')
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     if title:
         plt.title(title)
@@ -80,9 +80,12 @@ def calc_allocation(results,file_name):
         for prog_code, prog_name in zip(prog_codes,prog_labels):
             df_spending_optimized.loc[res.name,prog_name] = res.get_alloc()[prog_code][0]
     
+    colormap = plt.cm.Set2
+    colors = [colormap(i) for i in range(len(df_spending_optimized.columns))]
+    
     plt.figure()
-    ax = df_spending_optimized.plot.bar(stacked=True)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7})
+    ax = df_spending_optimized.plot.bar(stacked=True, color=colors)
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Interventions')
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
     plt.title('Budget allocation')
     plt.xticks(rotation=0)
