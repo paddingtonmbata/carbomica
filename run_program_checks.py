@@ -8,8 +8,8 @@ E.g.: It can be useful to set intervention effects to 0 (perfect effect), the sa
 
 '''
 
-facility_code = 'mb_hosp' # specify facility code
-facility_name = 'Mombasa Hospital '#C:\Users\cparker\OneDrive - WRHI\Desktop\Carbomica_reloaded\carbomica\'' # specify facility name
+facility_code = '_AKHS_Mombasa' # specify facility code
+facility_name = 'Aga Khan Hospital, Mombasa' #C:\Users\cparker\OneDrive - WRHI\Desktop\Carbomica_reloaded\carbomica\'' # specify facility name
 
 # Atomica project definition
 P = at.Project(framework='files/carbomica_framework.xlsx', databook='files/carbomica_databook.xlsx',do_run=False)
