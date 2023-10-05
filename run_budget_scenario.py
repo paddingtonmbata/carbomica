@@ -7,7 +7,7 @@ if not os.path.exists('figs'): os.makedirs('figs')
 Script to run a scenario where spending on interventions is specified.
 '''
 
-facility_code = 'mt_darwin' # specify facility code
+facility_code = 'AKHS_Mombasa' # specify facility code
 
 # Atomica project definition
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
@@ -33,7 +33,7 @@ start_year = 2024 # programs start year
 #     result_budget = P.run_sim(P.parsets[0],progset=P.progsets[0], progset_instructions=instructions, result_name='${}'.format(invest)) # run budget scenario
 #     result_budget.export_raw('results/{}_budget_raw.xlsx'.format(invest))
 #     result.append(result_budget)
-investment = 1e3
+investment = 1e4
 results_scenario = []
 
 for prog in progset.programs:
