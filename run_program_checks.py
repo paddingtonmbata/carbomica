@@ -8,17 +8,16 @@ E.g.: It can be useful to set intervention effects to 0 (perfect effect), the sa
 
 '''
 
-facility_code = 'mt-darwin_hosp_ZW' # specify facility code
-facility_name = 'Mt Darwin District Hospital, Zimbabwe' # specify facility name
+facility_code = 'AKHS_Mombasa' # specify facility code
 
 # Atomica project definition
-P = at.Project(framework='files/carbomica_framework.xlsx', databook='files/carbomica_databook.xlsx',do_run=False)
+P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
 
 P.settings.sim_dt    = 1 # simulation timestep
 P.settings.sim_start = 2010 # simulation start year
 P.settings.sim_end   = 2030 # simulation end year
 
-progset = P.load_progbook('files/carbomica_progbook_{}.xlsx'.format(facility_code)) # load progbook
+progset = P.load_progbook('books/carbomica_progbook_{}.xlsx'.format(facility_code)) # load progbook
 start_year = 2024 # programs start year
 
 # Run a budget scenario and verify that outputs make sense

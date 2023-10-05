@@ -7,7 +7,7 @@ if not os.path.exists('figs'): os.makedirs('figs')
 Script to run a scenario where coverage on interventions is specified.
 '''
 
-facility_code = 'mt_darwin' # specify facility code
+facility_code = 'AKHS_Mombasa' # specify facility code
 
 # Atomica project definition
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)

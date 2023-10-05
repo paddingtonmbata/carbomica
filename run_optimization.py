@@ -8,7 +8,7 @@ if not os.path.exists('figs'): os.makedirs('figs')
 Script to minimize emissions and optimize spending allocation for a set total budget.
 '''
 
-facility_code = 'mt_darwin' # specify facility code
+facility_code = 'AKHS_Mombasa' # specify facility code
 
 # Atomica project definition
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
@@ -26,7 +26,7 @@ start_year = 2024 # programs start year
 instructions = at.ProgramInstructions(alloc=P.progsets[0], start_year=start_year)
 
 # Adjustments (no spending constraint on any intervention)
-adjustments = [at.SpendingAdjustment(prog, start_year, 'abs', 0.0, 1e6) for prog in progset.programs]
+adjustments = [at.SpendingAdjustment(prog, start_year, 'abs', 0.0, 10e6) for prog in progset.programs]
 
 # Measurables (objective function: minimize total emissions)
 measurables = [at.MinimizeMeasurable('co2e_emissions',start_year)]
@@ -44,9 +44,9 @@ for budget, res_name in zip(budgets, res_names):
     constraints = at.TotalSpendConstraint(total_spend=budget, t=start_year) # constraint on total spending
     
     # Run optimization
-    optimization = at.Optimization(name='default', method='asd', 
+    optimization = at.Optimization(name='default', method='pso',
                                     adjustments=adjustments, measurables=measurables, constraints=constraints)
-    optimized_instructions = at.optimize(P, optimization, P.parsets[0],P.progsets[0], instructions=instructions)
+    optimized_instructions = at.optimize(P, optimization, P.parsets[0],P.progsets[0], instructions=instructions, optim_args={'maxiter':10})
     result_optimized = P.run_sim(P.parsets[0],P.progsets[0], progset_instructions=optimized_instructions,result_name=result_name)
 
     # Compile results
