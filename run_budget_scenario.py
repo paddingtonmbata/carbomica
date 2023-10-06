@@ -44,6 +44,6 @@ for prog in progset.programs:
     results_scenario.append(result_budget)
     
 # Calculate emissions and allocation
-ut.calc_emissions(results_scenario,start_year,facility_code,file_name='emissions_budget_scen_{}'.format(facility_code),title='CO2e emissions - fixed budget ($1,000.0)')
+ut.calc_emissions(results_scenario,start_year,facility_code,file_name='budget_scenario_Emissions_{}'.format(facility_code),title='CO2e emissions - fixed budget ($10,000.0)')
 # ut.calc_allocation(results_scenario,file_name='allocation_    budget_scen_{}'.format(facility_code)) # allocation
 

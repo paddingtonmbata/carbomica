@@ -44,4 +44,4 @@ for prog in progset.programs:
     results_scenario.append(result_budget)
     
 # Calculate emissions and allocation
-df=ut.calc_emissions(results_scenario,start_year,facility_code,file_name='emissions_coverage_scen_{}'.format(facility_code),title='CO2e emissions - full coverage')
+df=ut.calc_emissions(results_scenario,start_year,facility_code,file_name='coverage_scenario_Emissions_{}'.format(facility_code),title='CO2e emissions - full coverage')

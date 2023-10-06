@@ -44,7 +44,7 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
     worksheet.set_row(4, None, format_emit)
     
     # Generate bar plots of emissions
-    plt.figure()
+    plt.figure(figsize=(40,20))
     ax = df_emissions.plot.bar(stacked=True)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Emission sources')
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -80,10 +80,11 @@ def calc_allocation(results,file_name):
         for prog_code, prog_name in zip(prog_codes,prog_labels):
             df_spending_optimized.loc[res.name,prog_name] = res.get_alloc()[prog_code][0]
     
-    colormap = plt.cm.Set2
+    # https://matplotlib.org/stable/users/explain/colors/colormaps.html#qualitative
+    colormap = plt.cm.tab20
     colors = [colormap(i) for i in range(len(df_spending_optimized.columns))]
     
-    plt.figure()
+    plt.figure(figsize=(40,20))
     ax = df_spending_optimized.plot.bar(stacked=True, color=colors)
     ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Interventions')
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
@@ -97,13 +98,13 @@ def calc_allocation(results,file_name):
     writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
     df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
     
-    workbook  = writer_optim.book
-    worksheet = writer_optim.sheets['Optimized allocation']
-    format_cost = workbook.add_format({'num_format': '$#,##0.0'})
-    for i in np.arange(len(res_names)):
-        worksheet.set_row(i+1, None, format_cost) 
-    writer_optim.close()
-    print('Allocation results saved: results/{}.xlsx'.format(file_name))
+    # workbook  = writer_optim.book
+    # worksheet = writer_optim.sheets['Optimized allocation']
+    # format_cost = workbook.add_format({'num_format': '$#,##0.0'})
+    # for i in np.arange(len(res_names)):
+    #     worksheet.set_row(i+1, None, format_cost) 
+    # writer_optim.close()
+    # print('Allocation results saved: results/{}.xlsx'.format(file_name))
     print('Allocation bar plots saved: figs/{}.xlsx'.format(file_name))
     
     return df_spending_optimized

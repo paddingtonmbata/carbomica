@@ -103,10 +103,14 @@ for facility in facilities:
         P.programs[intervention].capacity_constraint = at.TimeSeries(units='people')
         P.programs[intervention].coverage = at.TimeSeries(units='people')
         
-        # Write in 'Program effects' sheet
-        target_pars = target_pars_overall.columns[target_pars_overall.loc[intervention]=='y'].tolist()
-        for par in target_pars:
+    # Write in 'Program effects' sheet
+    target_pars_overall_t = target_pars_overall.transpose()
+    for par in target_pars_overall_t.index:
+        target_interventions = target_pars_overall_t.columns[target_pars_overall_t.loc[par]=='y'].tolist()
+        progs = {}
+        for intervention in target_interventions:
             effect = effects.loc[facility,intervention+'_effect']
-            P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=0,progs={intervention:effect})
+            progs[intervention] = effect
+        P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=0,progs=progs)
     P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
     P.save('books/carbomica_progbook_{}.xlsx'.format(facility))  
