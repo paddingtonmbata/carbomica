@@ -45,15 +45,15 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
     
     # Generate bar plots of emissions
     plt.figure(figsize=(40,20))
-    ax = df_emissions.plot.bar(stacked=True)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Emission sources')
+    ax = df_emissions.plot.bar(stacked=True, figsize=(15,10), fontsize=20)
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), title='Emission sources', prop={'size':18}, title_fontsize=22)
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     if title:
-        plt.title(title)
+        plt.title(title, fontsize=25)
     else:
-        plt.title('Total CO2e emissions')
+        plt.title('Total CO2e emissions', fontsize=25)
     labels = [label.replace(' ','\n') for label in df_emissions.index]
-    plt.xticks(fontsize=8, labels=labels, ticks=plt.xticks()[0],rotation=0)
+    plt.xticks(fontsize=20, labels=labels, ticks=plt.xticks()[0],rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
@@ -84,19 +84,19 @@ def calc_allocation(results,file_name):
     colormap = plt.cm.tab20
     colors = [colormap(i) for i in range(len(df_spending_optimized.columns))]
     
-    plt.figure(figsize=(40,20))
-    ax = df_spending_optimized.plot.bar(stacked=True, color=colors)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Interventions')
+    plt.figure()
+    ax = df_spending_optimized.plot.bar(stacked=True, color=colors, figsize=(15,10), fontsize=20)
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), title='Interventions', prop={'size':18}, title_fontsize=22)
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
-    plt.title('Budget allocation')
+    plt.title('Budget allocation', fontsize=25)
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
     plt.close()
     
-    writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
-    df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
+    # writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
+    # df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
     
     # workbook  = writer_optim.book
     # worksheet = writer_optim.sheets['Optimized allocation']
