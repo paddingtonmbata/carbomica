@@ -1,17 +1,18 @@
 import atomica as at
 import pandas as pd
 import os
+import numpy as np
 if not os.path.exists('books'): os.makedirs('books')
 '''
 Script to generate a framework, databook and progbook.
 '''
 #%% 
-sites_list = pd.read_excel('AKHS_input_data.xlsx', sheet_name='study sites', index_col='Code Name')
+sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites', index_col='Code Name')
 facilities = {}
 for site in sites_list.index:
     facilities[site] = {'label': sites_list.loc[site,'Display Name'], 'type': 'facilities'}
 
-interventions_list = pd.read_excel('AKHS_input_data.xlsx', sheet_name='interventions', index_col='Code Name')
+interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions', index_col='Code Name')
 interventions = {}
 for intervention in interventions_list.index:
     interventions[intervention] = interventions_list.loc[intervention,'Display Name']
@@ -19,7 +20,7 @@ for intervention in interventions_list.index:
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework base from template
 df_fw = pd.read_excel(pd.ExcelFile('templates/carbomica_framework_template.xlsx'), sheet_name=None)
-emissions_list = pd.read_excel('AKHS_input_data.xlsx', sheet_name='emission sources', index_col='Code Name')
+emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources', index_col='Code Name')
 
 # define intervention-specific parameters and add to the Parameters sheet as a new row
 for i, emission in enumerate(emissions_list.index):
@@ -54,10 +55,10 @@ with pd.ExcelWriter('carbomica_framework.xlsx') as writer:
 
 #%% Step 2: generate and populate the databook (saved in "books/")
 F = at.ProjectFramework('carbomica_framework.xlsx')  # load framework
-data_years = 2023 # years for input data
+data_years = np.arange(2024,2024+5) # years for input data
 
 D = at.ProjectData.new(framework=F, tvec=data_years, pops=facilities, transfers=0)
-db_data = pd.read_excel('AKHS_input_data.xlsx', sheet_name='emission data', index_col='facilities')
+db_data = pd.read_excel('input_data.xlsx', sheet_name='emission data', index_col='facilities')
 cols_to_drop = [col for col in db_data.columns if 'Unnamed' in col]
 db_data.drop(columns=cols_to_drop,inplace=True)
 
@@ -75,21 +76,24 @@ databook_name = 'books/carbomica_databook.xlsx'
 P = at.Project(framework=F,databook=databook_name, do_run=False)
 for facility in facilities:
     progbook_path = 'templates/carbomica_progbook_{}.xlsx'.format(facility)
-    P.make_progbook(progbook_path,progs=interventions,data_start=data_years,data_end=data_years)
+    P.make_progbook(progbook_path,progs=interventions,data_start=data_years[0],data_end=data_years[-1])
     
-target_pars_overall = pd.read_excel('AKHS_input_data.xlsx', sheet_name='emission targets', index_col='interventions')
+target_pars_overall = pd.read_excel('input_data.xlsx', sheet_name='emission targets', index_col='interventions')
 cols_to_drop = [col for col in target_pars_overall.columns if 'Unnamed' in col]
 target_pars_overall.drop(columns=cols_to_drop,inplace=True)
 
-effects = pd.read_excel('AKHS_input_data.xlsx', sheet_name='effect sizes', index_col='facilities')
+effects = pd.read_excel('input_data.xlsx', sheet_name='effect sizes', index_col='facilities')
 cols_to_drop = [col for col in effects.columns if 'Unnamed' in col]
 effects.drop(columns=cols_to_drop,inplace=True)
 
 # Populate the progbooks that were just created and save the files to "books/"
 D = at.ProjectData.from_spreadsheet(databook_name,framework=F) 
-pb_costs = pd.read_excel('AKHS_input_data.xlsx', sheet_name='unit costs', index_col='facilities') 
-cols_to_drop = [col for col in pb_costs.columns if 'Unnamed' in col]
-pb_costs.drop(columns=cols_to_drop,inplace=True) 
+pb_costs_maintain = pd.read_excel('input_data.xlsx', sheet_name='maintenance costs', index_col='facilities') 
+cols_to_drop = [col for col in pb_costs_maintain.columns if 'Unnamed' in col]
+pb_costs_maintain.drop(columns=cols_to_drop,inplace=True) 
+pb_costs_implement = pd.read_excel('input_data.xlsx', sheet_name='implementation costs', index_col='facilities') 
+cols_to_drop = [col for col in pb_costs_implement.columns if 'Unnamed' in col]
+pb_costs_implement.drop(columns=cols_to_drop,inplace=True) 
 for facility in facilities:
     P = at.ProgramSet.from_spreadsheet(spreadsheet='templates/carbomica_progbook_{}.xlsx'.format(facility), framework=F, data=D, _allow_missing_data=True)
     for intervention in interventions:
@@ -98,15 +102,19 @@ for facility in facilities:
         P.programs[intervention].target_comps = ['facilities_number']
         
         # Write in 'Spending data' sheet
-        P.programs[intervention].unit_cost = at.TimeSeries(assumption=pb_costs.loc[facility,intervention+'_cost'], units='$/person/year')
-        P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
+        P.programs[intervention].unit_cost = at.TimeSeries(assumption=pb_costs_implement.loc[facility,intervention+'_cost']/len(data_years)+pb_costs_maintain.loc[facility,intervention+'_cost'], units='$/person/year')
+        P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year')
         P.programs[intervention].capacity_constraint = at.TimeSeries(units='people')
         P.programs[intervention].coverage = at.TimeSeries(units='people')
         
-        # Write in 'Program effects' sheet
-        target_pars = target_pars_overall.columns[target_pars_overall.loc[intervention]=='y'].tolist()
-        for par in target_pars:
+    # Write in 'Program effects' sheet
+    target_pars_overall_t = target_pars_overall.transpose()
+    for par in target_pars_overall_t.index:
+        target_interventions = target_pars_overall_t.columns[target_pars_overall_t.loc[par]=='y'].tolist()
+        progs = {}
+        for intervention in target_interventions:
             effect = effects.loc[facility,intervention+'_effect']
-            P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=0,progs={intervention:effect})
+            progs[intervention] = effect
+        P.covouts[(par+'_mult', facility)] = at.programs.Covout(par=par+'_mult',pop=facility,cov_interaction='random',baseline=0,progs=progs)
     P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
     P.save('books/carbomica_progbook_{}.xlsx'.format(facility))  

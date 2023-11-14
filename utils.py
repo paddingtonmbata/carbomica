@@ -22,11 +22,11 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
         if '_mult' not in par and '_emissions' not in par and '_baseline' not in par:
             parameters.append(par)
     par_labels = [par.replace('_',' ').title() for par in parameters]
-    rows = ['Status-\nquo'] + [res.name for res in results]
+    rows = ['Status-quo'] + [res.name for res in results]
     df_emissions = pd.DataFrame(index=rows, columns=par_labels)
     start_i = list(results[0].t).index(start_year)
     for par, par_label in zip(parameters, par_labels):
-        df_emissions.loc['Status-\nquo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
+        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
     for res in results:
         # Create DataFrame of emissions
         for par, par_label in zip(parameters, par_labels):
@@ -44,16 +44,16 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
     worksheet.set_row(4, None, format_emit)
     
     # Generate bar plots of emissions
-    plt.figure()
-    ax = df_emissions.plot.bar(stacked=True)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Emission sources')
+    plt.figure(figsize=(40,20))
+    ax = df_emissions.plot.bar(stacked=True, figsize=(15,10), fontsize=20)
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), title='Emission sources', prop={'size':18}, title_fontsize=22)
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     if title:
-        plt.title(title)
+        plt.title(title, fontsize=25)
     else:
-        plt.title('Total CO2e emissions')
-    labels = [label.replace(' ','\n') for label in df_emissions.index]
-    plt.xticks(fontsize=8, labels=labels, ticks=plt.xticks()[0],rotation=0)
+        plt.title('Total CO2e emissions', fontsize=25)
+    # labels = [label.replace(' ','\n') for label in df_emissions.index]
+    plt.xticks(fontsize=20, ticks=plt.xticks()[0],rotation=90)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
@@ -80,30 +80,31 @@ def calc_allocation(results,file_name):
         for prog_code, prog_name in zip(prog_codes,prog_labels):
             df_spending_optimized.loc[res.name,prog_name] = res.get_alloc()[prog_code][0]
     
-    colormap = plt.cm.Set2
+    # https://matplotlib.org/stable/users/explain/colors/colormaps.html#qualitative
+    colormap = plt.cm.tab20
     colors = [colormap(i) for i in range(len(df_spending_optimized.columns))]
     
     plt.figure()
-    ax = df_spending_optimized.plot.bar(stacked=True, color=colors)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), prop={'size':7}, title='Interventions')
+    ax = df_spending_optimized.plot.bar(stacked=True, color=colors, figsize=(15,10), fontsize=20)
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), title='Interventions', prop={'size':18}, title_fontsize=22)
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
-    plt.title('Budget allocation')
+    plt.title('Budget allocation', fontsize=25)
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
     plt.close()
     
-    writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
-    df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
+    # writer_optim = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
+    # df_spending_optimized.to_excel(writer_optim, sheet_name='Optimized allocation', index=True)
     
-    workbook  = writer_optim.book
-    worksheet = writer_optim.sheets['Optimized allocation']
-    format_cost = workbook.add_format({'num_format': '$#,##0.0'})
-    for i in np.arange(len(res_names)):
-        worksheet.set_row(i+1, None, format_cost) 
-    writer_optim.close()
-    print('Allocation results saved: results/{}.xlsx'.format(file_name))
+    # workbook  = writer_optim.book
+    # worksheet = writer_optim.sheets['Optimized allocation']
+    # format_cost = workbook.add_format({'num_format': '$#,##0.0'})
+    # for i in np.arange(len(res_names)):
+    #     worksheet.set_row(i+1, None, format_cost) 
+    # writer_optim.close()
+    # print('Allocation results saved: results/{}.xlsx'.format(file_name))
     print('Allocation bar plots saved: figs/{}.xlsx'.format(file_name))
     
     return df_spending_optimized
