@@ -1,6 +1,7 @@
 import atomica as at
 import pandas as pd
 import os
+import numpy as np
 if not os.path.exists('books'): os.makedirs('books')
 '''
 Script to generate a framework, databook and progbook.
@@ -54,7 +55,7 @@ with pd.ExcelWriter('carbomica_framework.xlsx') as writer:
 
 #%% Step 2: generate and populate the databook (saved in "books/")
 F = at.ProjectFramework('carbomica_framework.xlsx')  # load framework
-data_years = 2023 # years for input data
+data_years = np.arange(2024,2024+5) # years for input data
 
 D = at.ProjectData.new(framework=F, tvec=data_years, pops=facilities, transfers=0)
 db_data = pd.read_excel('input_data.xlsx', sheet_name='emission data', index_col='facilities')
@@ -75,7 +76,7 @@ databook_name = 'books/carbomica_databook.xlsx'
 P = at.Project(framework=F,databook=databook_name, do_run=False)
 for facility in facilities:
     progbook_path = 'templates/carbomica_progbook_{}.xlsx'.format(facility)
-    P.make_progbook(progbook_path,progs=interventions,data_start=data_years,data_end=data_years)
+    P.make_progbook(progbook_path,progs=interventions,data_start=data_years[0],data_end=data_years[-1])
     
 target_pars_overall = pd.read_excel('input_data.xlsx', sheet_name='emission targets', index_col='interventions')
 cols_to_drop = [col for col in target_pars_overall.columns if 'Unnamed' in col]
@@ -87,9 +88,12 @@ effects.drop(columns=cols_to_drop,inplace=True)
 
 # Populate the progbooks that were just created and save the files to "books/"
 D = at.ProjectData.from_spreadsheet(databook_name,framework=F) 
-pb_costs = pd.read_excel('input_data.xlsx', sheet_name='unit costs', index_col='facilities') 
-cols_to_drop = [col for col in pb_costs.columns if 'Unnamed' in col]
-pb_costs.drop(columns=cols_to_drop,inplace=True) 
+pb_costs_maintain = pd.read_excel('input_data.xlsx', sheet_name='maintenance costs', index_col='facilities') 
+cols_to_drop = [col for col in pb_costs_maintain.columns if 'Unnamed' in col]
+pb_costs_maintain.drop(columns=cols_to_drop,inplace=True) 
+pb_costs_implement = pd.read_excel('input_data.xlsx', sheet_name='implementation costs', index_col='facilities') 
+cols_to_drop = [col for col in pb_costs_implement.columns if 'Unnamed' in col]
+pb_costs_implement.drop(columns=cols_to_drop,inplace=True) 
 for facility in facilities:
     P = at.ProgramSet.from_spreadsheet(spreadsheet='templates/carbomica_progbook_{}.xlsx'.format(facility), framework=F, data=D, _allow_missing_data=True)
     for intervention in interventions:
@@ -98,8 +102,8 @@ for facility in facilities:
         P.programs[intervention].target_comps = ['facilities_number']
         
         # Write in 'Spending data' sheet
-        P.programs[intervention].unit_cost = at.TimeSeries(assumption=pb_costs.loc[facility,intervention+'_cost'], units='$/person/year')
-        P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
+        P.programs[intervention].unit_cost = at.TimeSeries(assumption=pb_costs_implement.loc[facility,intervention+'_cost']/len(data_years)+pb_costs_maintain.loc[facility,intervention+'_cost'], units='$/person/year')
+        P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year')
         P.programs[intervention].capacity_constraint = at.TimeSeries(units='people')
         P.programs[intervention].coverage = at.TimeSeries(units='people')
         

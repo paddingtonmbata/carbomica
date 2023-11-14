@@ -14,8 +14,8 @@ facility_code = 'AKHS_Mombasa' # specify facility code
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
 
 P.settings.sim_dt    = 1 # simulation timestep
-P.settings.sim_start = 2022 # simulation start year
-P.settings.sim_end   = 2025 # simulation end year
+P.settings.sim_start = 2024 # simulation start year
+P.settings.sim_end   = 2024+5 # simulation end year
 
 # Load program and define variables for program runs
 progset = P.load_progbook('books/carbomica_progbook_{}.xlsx'.format(facility_code))
@@ -71,7 +71,7 @@ for budget, name in zip(budgets, result_names):
     result_optimized.name = name
     results_optimized.append(result_optimized)
 
-# Plot and save emissions    
+# Plot and save emissions
 ut.calc_emissions(results_optimized,start_year,facility_code,file_name='optimization_Emissions_{}'.format(facility_code))
 
 # Plot budget allocation

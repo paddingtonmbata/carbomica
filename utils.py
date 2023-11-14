@@ -22,11 +22,11 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
         if '_mult' not in par and '_emissions' not in par and '_baseline' not in par:
             parameters.append(par)
     par_labels = [par.replace('_',' ').title() for par in parameters]
-    rows = ['Status-\nquo'] + [res.name for res in results]
+    rows = ['Status-quo'] + [res.name for res in results]
     df_emissions = pd.DataFrame(index=rows, columns=par_labels)
     start_i = list(results[0].t).index(start_year)
     for par, par_label in zip(parameters, par_labels):
-        df_emissions.loc['Status-\nquo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
+        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
     for res in results:
         # Create DataFrame of emissions
         for par, par_label in zip(parameters, par_labels):
@@ -52,8 +52,8 @@ def calc_emissions(results,start_year,facility_code,file_name,title=None):
         plt.title(title, fontsize=25)
     else:
         plt.title('Total CO2e emissions', fontsize=25)
-    labels = [label.replace(' ','\n') for label in df_emissions.index]
-    plt.xticks(fontsize=20, labels=labels, ticks=plt.xticks()[0],rotation=0)
+    # labels = [label.replace(' ','\n') for label in df_emissions.index]
+    plt.xticks(fontsize=20, ticks=plt.xticks()[0],rotation=90)
     plt.tight_layout()
     plt.savefig('figs/{}.png'.format(file_name))
     plt.show()
