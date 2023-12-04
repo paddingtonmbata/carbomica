@@ -5,65 +5,159 @@ import numpy as np
 import atomica as at
 
 
-#%% Calculation functions
-def calc_emissions(results,start_year,facility_code,file_name,title=None):
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import pandas as pd
+import numpy as np
+import atomica as at
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import pandas as pd
+import atomica as at
+
+def calc_emissions(results, start_year, facility_code, file_name, title=None):
     '''
-    Calculate emissions before and after programs implementation, export results to excel and generate bar plots
-    :param results: list of atomica result objects
-    :param start_year: start year of programs 
-    :param facility: facility code
-    :param file_name: (optional) specify excel file name for saving
-    :return: df_emissions: dataFrame of results
+    Calculate emissions before and after program implementation, export results to Excel, and generate bar plots.
+    :param results: list of Atomica result objects.
+    :param start_year: Start year of programs.
+    :param facility_code: Code of the facility.
+    :param file_name: Specify Excel file name for saving.
+    :param title: Title for the plot.
+    :return: DataFrame of emissions results.
     '''
+    # Extract relevant parameter names for plotting
     pop = results[0].pop_names[0]
     pars = results[0].par_names(pop)
-    parameters = []
-    for par in pars:
-        if '_mult' not in par and '_emissions' not in par and '_baseline' not in par:
-            parameters.append(par)
-    par_labels = [par.replace('_',' ').title() for par in parameters]
+    parameters = [par for par in pars if '_mult' not in par and '_emissions' not in par and '_baseline' not in par]
+    par_labels = [par.replace('_', ' ').title() for par in parameters]
+    
+    # Set up DataFrame for emissions
     rows = ['Status-quo'] + [res.name for res in results]
     df_emissions = pd.DataFrame(index=rows, columns=par_labels)
     start_i = list(results[0].t).index(start_year)
+    
+    # Populate the DataFrame with emissions data
     for par, par_label in zip(parameters, par_labels):
-        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
-    for res in results:
-        # Create DataFrame of emissions
-        for par, par_label in zip(parameters, par_labels):
+        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i - 1]
+        for res in results:
             df_emissions.loc[res.name, par_label] = res.get_variable(par, facility_code)[0].vals[start_i]
-        
-    # Print to excel
-    writer_emissions = pd.ExcelWriter('results/{}.xlsx'.format(file_name), engine='xlsxwriter')    
-    df_emissions.to_excel(writer_emissions, sheet_name=facility_code, index=True)
-    workbook  = writer_emissions.book
-    worksheet = writer_emissions.sheets[facility_code]
-    format_emit = workbook.add_format({'num_format': '#,##0.00'})
-    worksheet.set_row(1, None, format_emit)
-    worksheet.set_row(2, None, format_emit)
-    worksheet.set_row(3, None, format_emit)
-    worksheet.set_row(4, None, format_emit)
     
-    # Generate bar plots of emissions
-    plt.figure(figsize=(40,20))
-    ax = df_emissions.plot.bar(stacked=True, figsize=(15,10), fontsize=20)
-    ax.legend(loc='upper left', bbox_to_anchor=(1.05,1), title='Emission sources', prop={'size':18}, title_fontsize=22)
+    # Export the DataFrame to Excel
+    writer_emissions = pd.ExcelWriter(f'results/{file_name}.xlsx', engine='xlsxwriter')
+    df_emissions.to_excel(writer_emissions, sheet_name=facility_code)
+    writer_emissions.save()
+    
+    # Generate the bar plot
+    fig_width = max(20, len(par_labels) * 1.5)
+    fig_height = 10
+    font_size = 12
+    plt.figure(figsize=(fig_width, fig_height))
+    ax = df_emissions.plot(kind='bar', stacked=True, fontsize=font_size)
+    
+    # Set plot title
+    plt.title(title or 'Total CO2e Emissions', fontsize=font_size + 2)
+    
+    # Adjust legend
+    ax.legend(title='Emission Sources', bbox_to_anchor=(1.0, 1.0), loc='upper left')
+    
+    # Format the y-axis
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-    if title:
-        plt.title(title, fontsize=25)
-    else:
-        plt.title('Total CO2e emissions', fontsize=25)
-    # labels = [label.replace(' ','\n') for label in df_emissions.index]
-    plt.xticks(fontsize=20, ticks=plt.xticks()[0],rotation=90)
-    plt.tight_layout()
-    plt.savefig('figs/{}.png'.format(file_name))
-    plt.show()
-    plt.close()
-        
-    writer_emissions.close()
-    print('Emissions results saved: results/{}.xlsx'.format(file_name))
-    print('Emissions bar plots saved: figs/{}.xlsx'.format(file_name))
     
+    # Adjust x-axis labels
+    plt.xticks(rotation=90, ha='center')
+    plt.ylabel('Emissions (CO2e)', fontsize=font_size)
+    
+    # Tight layout and save figure
+    plt.tight_layout()
+    plt.savefig(f'figs/{file_name}.png', bbox_inches='tight')
+    plt.show()
+    
+    # Close the writer and release Excel file
+    writer_emissions.close()
+    
+    print(f'Emissions results saved: results/{file_name}.xlsx')
+    print(f'Emissions bar plots saved: figs/{file_name}.png')
+
     return df_emissions
+
+# You can call the function with the appropriate parameters to generate the emissions calculations and visualizations.
+
+
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import pandas as pd
+import atomica as at
+
+def calc_emissions(results, start_year, facility_code, file_name, title=None):
+    '''
+    Calculate emissions before and after program implementation, export results to Excel, and generate bar plots.
+    :param results: list of Atomica result objects.
+    :param start_year: Start year of programs.
+    :param facility_code: Code of the facility.
+    :param file_name: Specify Excel file name for saving.
+    :param title: Title for the plot.
+    :return: DataFrame of emissions results.
+    '''
+    # Extract relevant parameter names for plotting
+    pop = results[0].pop_names[0]
+    pars = results[0].par_names(pop)
+    parameters = [par for par in pars if '_mult' not in par and '_emissions' not in par and '_baseline' not in par]
+    par_labels = [par.replace('_', ' ').title() for par in parameters]  # Ensure this is defined within the function scope
+
+    # Set up DataFrame for emissions
+    rows = ['Status-quo'] + [res.name for res in results]
+    df_emissions = pd.DataFrame(index=rows, columns=par_labels)
+    start_i = list(results[0].t).index(start_year)
+    
+    # Populate the DataFrame with emissions data
+    for par, par_label in zip(parameters, par_labels):
+        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i - 1]
+        for res in results:
+            df_emissions.loc[res.name, par_label] = res.get_variable(par, facility_code)[0].vals[start_i]
+    
+    # Export the DataFrame to Excel
+    writer_emissions = pd.ExcelWriter(f'results/{file_name}.xlsx', engine='xlsxwriter')
+    df_emissions.to_excel(writer_emissions, sheet_name=facility_code)
+    writer_emissions.save()
+    
+    # Generate the bar plot
+    num_parameters = len(par_labels)  # Use par_labels after it is defined
+    fig_width = max(20, num_parameters * 1.5)
+    fig_height = 10
+    font_size = 12
+    plt.figure(figsize=(fig_width, fig_height))
+    ax = df_emissions.plot(kind='bar', stacked=True, fontsize=font_size)
+    
+    # Set plot title
+    plt.title(title or 'Total CO2e Emissions', fontsize=font_size + 2)
+    
+    # Adjust legend
+    ax.legend(title='Emission Sources', bbox_to_anchor=(1.0, 1.0), loc='upper left')
+    
+    # Format the y-axis
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    
+    # Adjust x-axis labels
+    plt.xticks(rotation=90, ha='center')
+    plt.ylabel('Emissions (CO2e)', fontsize=font_size)
+    
+    # Tight layout and save figure
+    plt.tight_layout()
+    plt.savefig(f'figs/{file_name}.png', bbox_inches='tight')
+    plt.show()
+    
+    # Close the writer and release Excel file
+    writer_emissions.close()
+    
+    print(f'Emissions results saved: results/{file_name}.xlsx')
+    print(f'Emissions bar plots saved: figs/{file_name}.png')
+
+    return df_emissions
+
+
+
     
 def calc_allocation(results,file_name):
     '''

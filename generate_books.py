@@ -7,12 +7,12 @@ if not os.path.exists('books'): os.makedirs('books')
 Script to generate a framework, databook and progbook.
 '''
 #%% 
-sites_list = pd.read_excel('input_data.xlsx', sheet_name='study sites', index_col='Code Name')
+sites_list = pd.read_excel('input_data_1204.xlsx', sheet_name='study sites', index_col='Code Name')
 facilities = {}
 for site in sites_list.index:
     facilities[site] = {'label': sites_list.loc[site,'Display Name'], 'type': 'facilities'}
 
-interventions_list = pd.read_excel('input_data.xlsx', sheet_name='interventions', index_col='Code Name')
+interventions_list = pd.read_excel('input_data_1204.xlsx', sheet_name='interventions', index_col='Code Name')
 interventions = {}
 for intervention in interventions_list.index:
     interventions[intervention] = interventions_list.loc[intervention,'Display Name']
@@ -20,7 +20,7 @@ for intervention in interventions_list.index:
 #%% Step 1: read in base framework, and generate intervention-specific parameters 
 # read framework base from template
 df_fw = pd.read_excel(pd.ExcelFile('templates/carbomica_framework_template.xlsx'), sheet_name=None)
-emissions_list = pd.read_excel('input_data.xlsx', sheet_name='emission sources', index_col='Code Name')
+emissions_list = pd.read_excel('input_data_1204.xlsx', sheet_name='emission sources', index_col='Code Name')
 
 # define intervention-specific parameters and add to the Parameters sheet as a new row
 for i, emission in enumerate(emissions_list.index):
@@ -58,7 +58,7 @@ F = at.ProjectFramework('carbomica_framework.xlsx')  # load framework
 data_years = np.arange(2024,2024+5) # years for input data
 
 D = at.ProjectData.new(framework=F, tvec=data_years, pops=facilities, transfers=0)
-db_data = pd.read_excel('input_data.xlsx', sheet_name='emission data', index_col='facilities')
+db_data = pd.read_excel('input_data_1204.xlsx', sheet_name='emission data', index_col='facilities')
 cols_to_drop = [col for col in db_data.columns if 'Unnamed' in col]
 db_data.drop(columns=cols_to_drop,inplace=True)
 
@@ -78,20 +78,20 @@ for facility in facilities:
     progbook_path = 'templates/carbomica_progbook_{}.xlsx'.format(facility)
     P.make_progbook(progbook_path,progs=interventions,data_start=data_years[0],data_end=data_years[-1])
     
-target_pars_overall = pd.read_excel('input_data.xlsx', sheet_name='emission targets', index_col='interventions')
+target_pars_overall = pd.read_excel('input_data_1204.xlsx', sheet_name='emission targets', index_col='interventions')
 cols_to_drop = [col for col in target_pars_overall.columns if 'Unnamed' in col]
 target_pars_overall.drop(columns=cols_to_drop,inplace=True)
 
-effects = pd.read_excel('input_data.xlsx', sheet_name='effect sizes', index_col='facilities')
+effects = pd.read_excel('input_data_1204.xlsx', sheet_name='effect sizes', index_col='facilities')
 cols_to_drop = [col for col in effects.columns if 'Unnamed' in col]
 effects.drop(columns=cols_to_drop,inplace=True)
 
 # Populate the progbooks that were just created and save the files to "books/"
 D = at.ProjectData.from_spreadsheet(databook_name,framework=F) 
-pb_costs_maintain = pd.read_excel('input_data.xlsx', sheet_name='maintenance costs', index_col='facilities') 
+pb_costs_maintain = pd.read_excel('input_data_1204.xlsx', sheet_name='maintenance costs', index_col='facilities') 
 cols_to_drop = [col for col in pb_costs_maintain.columns if 'Unnamed' in col]
 pb_costs_maintain.drop(columns=cols_to_drop,inplace=True) 
-pb_costs_implement = pd.read_excel('input_data.xlsx', sheet_name='implementation costs', index_col='facilities') 
+pb_costs_implement = pd.read_excel('input_data_1204.xlsx', sheet_name='implementation costs', index_col='facilities') 
 cols_to_drop = [col for col in pb_costs_implement.columns if 'Unnamed' in col]
 pb_costs_implement.drop(columns=cols_to_drop,inplace=True) 
 for facility in facilities:
