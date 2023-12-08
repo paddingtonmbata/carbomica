@@ -113,14 +113,14 @@ def calc_emissions(results, start_year, facility_code, file_name, title=None):
     
     # Populate the DataFrame with emissions data
     for par, par_label in zip(parameters, par_labels):
-        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i - 1]
+        df_emissions.loc['Status-quo', par_label] = results[0].get_variable(par, facility_code)[0].vals[start_i-1]
         for res in results:
             df_emissions.loc[res.name, par_label] = res.get_variable(par, facility_code)[0].vals[start_i]
     
     # Export the DataFrame to Excel
     writer_emissions = pd.ExcelWriter(f'results/{file_name}.xlsx', engine='xlsxwriter')
     df_emissions.to_excel(writer_emissions, sheet_name=facility_code)
-    writer_emissions.save()
+    # writer_emissions.save()
     
     # Generate the bar plot
     num_parameters = len(par_labels)  # Use par_labels after it is defined

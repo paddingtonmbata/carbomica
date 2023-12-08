@@ -13,7 +13,7 @@ facility_code = 'AKHS_Mombasa' # specify facility code
 P = at.Project(framework='carbomica_framework.xlsx', databook='books/carbomica_databook.xlsx',do_run=False)
 
 P.settings.sim_dt    = 1 # simulation timestep
-P.settings.sim_start = 2024 # simulation start year
+P.settings.sim_start = 2023 # simulation start year
 P.settings.sim_end   = 2024+5 # simulation end year
 
 # Load program and define variables for program runs
