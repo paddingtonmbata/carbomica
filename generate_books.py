@@ -40,9 +40,12 @@ for i, emission in enumerate(emissions_list.index):
             'Targetable': 'n',
             'Population type': 'facilities',
             'Function': emission_par['Code Name']+'*(1-'+emission_mult['Code Name']+')'} # define coverage of intervention as a new row in framework
-    df_fw['Parameters'] = df_fw['Parameters'].append(emission_par, ignore_index=True) # add the coverage row to the framework
-    df_fw['Parameters'] = df_fw['Parameters'].append(emission_mult, ignore_index=True) # add the coverage row to the framework
-    df_fw['Parameters'] = df_fw['Parameters'].append(emission_actual, ignore_index=True) # add the coverage row to the framework
+    df_fw['Parameters'] = pd.concat([df_fw['Parameters'], pd.DataFrame([emission_par])], ignore_index=True)
+    df_fw['Parameters'] = pd.concat([df_fw['Parameters'], pd.DataFrame([emission_mult])], ignore_index=True)
+    df_fw['Parameters'] = pd.concat([df_fw['Parameters'], pd.DataFrame([emission_actual])], ignore_index=True)
+    # df_fw['Parameters'].append(emission_par, ignore_index=True) # add the coverage row to the framework
+    # df_fw['Parameters'] = df_fw['Parameters'].append(emission_mult, ignore_index=True) # add the coverage row to the framework
+    # df_fw['Parameters'] = df_fw['Parameters'].append(emission_actual, ignore_index=True) # add the coverage row to the framework
     # update the function for total emissions:
     if i == 0:
         df_fw['Parameters'].loc[df_fw['Parameters']['Code Name']=='co2e_emissions','Function'] = emission_actual['Code Name']
@@ -55,7 +58,7 @@ with pd.ExcelWriter('carbomica_framework.xlsx') as writer:
 
 #%% Step 2: generate and populate the databook (saved in "books/")
 F = at.ProjectFramework('carbomica_framework.xlsx')  # load framework
-data_years = np.arange(2024,2024+5) # years for input data
+data_years = np.arange(2023,2024+5) # years for input data
 
 D = at.ProjectData.new(framework=F, tvec=data_years, pops=facilities, transfers=0)
 db_data = pd.read_excel('input_data_1204.xlsx', sheet_name='emission data', index_col='facilities')
