@@ -8,6 +8,14 @@ Function to generate a framework, databook and progbook.
 '''
 
 def generate_books(input_data_sheet, start_year, end_year):
+    '''
+    Generate framework, databook and progbook based on input data sheet.
+    Results on emission reductions are saved in an excel sheet.
+    :param input_data_sheet: file name of input data sheet.
+    :param start_year: Start year of simulations.
+    :param facility_code: Code of the facility.
+    :return: 
+    '''
     facility_code = pd.read_excel(input_data_sheet, sheet_name='facility', index_col='Code Name')
     facility = {}
     facility[facility_code.index[0]] = {'label': facility_code.loc[facility_code.index[0],'Display Name'], 'type': 'facilities'}
@@ -119,4 +127,3 @@ def generate_books(input_data_sheet, start_year, end_year):
         P.programs[intervention].spend_data = at.TimeSeries(data_years,0, units='$/year') # make initial spending a small, negligible but non-zero number for optimisation initialisation
     P.save('books/carbomica_progbook_{}.xlsx'.format(facility_code))  
         
-    return facility_code

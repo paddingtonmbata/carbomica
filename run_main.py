@@ -1,6 +1,5 @@
 """
-Define project variables
-Modify variables as needed
+Run three main scenarios.
 """
 import numpy as np
 from project import P, progset, start_year, facility_code
