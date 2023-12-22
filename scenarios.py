@@ -50,7 +50,7 @@ def budget_scenario(P, progset, start_year, facility_code, spending:int):
 
 def optimization(P, progset, start_year, facility_code, budgets:list):
     '''
-    Run a scenario where spending on interventions are individually specified.
+    Optimize spending allocation on interventions by minizing emissions for a set total budget.
     Results on emission reductions and optimized budget allocations are saved in an excel sheet.
     :param P: Atomica project.
     :param start_year: Start year of simulations.
