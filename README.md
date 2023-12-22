@@ -10,13 +10,13 @@ Atomica
 
 ## Modifiable scripts
 ### `project.py`
-Script that define the Atomica project based on the `input_data.xlsx` spreadsheet.
+Script that defines the Atomica project based on the `input_data.xlsx` spreadsheet.
 
 ### `run_main.py`
 Script to run the three main scenarios:
-- `coverage_scenario`: Run a scenario where interventions are individually fully covered.
-- `budget_scenario`: Run a scenario where spending on interventions are individually specified.
-- `optimization`: Optimize spending allocation on interventions by minizing emissions for a set total budget.
+- `coverage_scenario`: Run a scenario where individual interventions are fully covered.
+- `budget_scenario`: Run a scenario where spending on individual interventions is specified.
+- `optimization`: Optimize spending allocation on all interventions by minizing emissions for a set total budget.
 
 ### `run_program_checks.py`
 Script to check output of programs under certain coverage and budget conditions.
