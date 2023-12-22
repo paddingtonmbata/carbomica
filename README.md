@@ -1,9 +1,8 @@
 # carbomica
 ## Name
-CARBOMICA
+CARBOMICA (CARBOn MItigation Tool for HealthCAre FAcilities​)
 
 ## Description
-CARBOMICA stands for CARBOn MItigation Tool for HealthCAre FAcilities​
 CARBOMICA is a resource allocation tool for carbon mitigation in healthcare facilities, developed by the Burnet Institute and HIGH Horizons Consortium.
 
 ## Requirements
