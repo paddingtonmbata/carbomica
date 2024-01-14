@@ -3,6 +3,7 @@ import utils as ut
 import os
 if not os.path.exists('results'): os.makedirs('results')
 if not os.path.exists('figs'): os.makedirs('figs')
+import streamlit as st
 
 
 def coverage_scenario(P, progset, start_year, facility_code):
@@ -15,7 +16,6 @@ def coverage_scenario(P, progset, start_year, facility_code):
     :return: 
     '''
     results_scenario = [P.run_sim(parset='default',result_name='Status-quo')] # run status-quo
-    
     for prog in progset.programs:
         coverage_scenario = {prog_all: 0 for prog_all in progset.programs}
         coverage_scenario[prog] = 1
@@ -49,6 +49,7 @@ def budget_scenario(P, progset, start_year, facility_code, spending:int):
     ut.calc_emissions(results_scenario,start_year,facility_code,file_name='budget_scenario_Emissions_{}'.format(facility_code),title='CO2e emissions - fixed budget (${:0,.0f})'.format(spending))
 
 def optimization(P, progset, start_year, facility_code, budgets:list):
+    print("running optimization")
     '''
     Optimize spending allocation on interventions by minizing emissions for a set total budget.
     Results on emission reductions and optimized budget allocations are saved in an excel sheet.
@@ -101,9 +102,11 @@ def optimization(P, progset, start_year, facility_code, budgets:list):
         results_optimized.append(result_optimized)
         
     # Plot and save emissions
+    st.header("Optimization Budget Allocation")
     ut.calc_emissions(results_optimized,start_year,facility_code,file_name='optimization_Emissions_{}'.format(facility_code))
     
     # Plot budget allocation (exclude status-quo result)
+    st.header("Optiomization Emissioms")
     ut.plot_allocation(results_optimized[1:],file_name='optimization_Budget_Allocation_{}'.format(facility_code)) # allocation
     
     # Save budget allocation and interventions coverage (exclude status-quo result)

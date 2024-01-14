@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
 import atomica as at
+import streamlit as st
 
 def calc_emissions(results, start_year, facility_code, file_name, title=None):
     '''
@@ -63,6 +64,20 @@ def calc_emissions(results, start_year, facility_code, file_name, title=None):
     print(f'Emissions results saved: results/{file_name}.xlsx')
     print(f'Emissions bar plots saved: figs/{file_name}.png')
 
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_emissions.plot(ax=ax, kind='bar', stacked=True, fontsize=font_size)
+
+    # Customize plot
+    plt.title(title or 'Total CO2e Emissions', fontsize=font_size + 2)
+    ax.legend(title='Emission Sources', bbox_to_anchor=(1.0, 1.0), loc='upper left', fontsize=font_size-2, title_fontsize=font_size)
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    plt.xticks(rotation=90, ha='center')
+    plt.ylabel('Emissions (CO2e)', fontsize=font_size)
+    plt.tight_layout()
+
+    # Return the Matplotlib plot as a Streamlit component
+    return st.pyplot(fig)
+
     
 def plot_allocation(results,file_name):
     '''
@@ -95,6 +110,19 @@ def plot_allocation(results,file_name):
     plt.close()
     
     print('Allocation bar plots saved: figs/{}.png'.format(file_name))
+
+    fig, ax = plt.subplots(figsize=(15, 10))
+    df_spending_optimized.plot.bar(stacked=True, color=colors, ax=ax, fontsize=22)
+
+    # Customize plot
+    ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1), title='Interventions', fontsize=20, title_fontsize=22)
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('${x:,.0f}'))
+    plt.title('Budget allocation', fontsize=25)
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+
+    # Return the Matplotlib plot as a Streamlit component
+    return st.pyplot(fig)
     
 
 def write_alloc_excel(progset, results, year, print_results=True,file_name=None):
